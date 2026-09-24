@@ -33,10 +33,25 @@ Jan Wilczek (thinkcell)
 
 ---
 
-# The Problem with `std::function`
+# `std::function`: Problem 1
 
-https://godbolt.org/z/nTvcexTf5
+https://godbolt.org/z/vKsd8cPe3
 
+````md magic-move
+```cpp
+std::function<void(void)> f = [i = 0] {
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // will this compile?
+```
+```cpp
+std::function<void(void)> f = [i = 0] {
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // ✅
+```
 ```cpp
 std::function<void(void)> f = [i = 0] mutable {
     ++i;
@@ -45,6 +60,105 @@ std::function<void(void)> f = [i = 0] mutable {
 const auto& fref = f;
 fref(); // will this compile?
 ```
+```cpp
+std::function<void(void)> f = [i = 0] mutable {
+    ++i;
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // i=1 ⚠️
+```
+```cpp
+std::move_only_function<void(void)> f = [i = 0] mutable {
+    ++i;
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // ❌
+```
+```cpp
+std::move_only_function<void(void)> f = [i = 0] mutable {
+    ++i;
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // ❌
+const auto g = f; // ❌
+```
+```cpp
+std::copyable_function<void(void)> f = [i = 0] mutable {
+    ++i;
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // ❌
+const auto g = f; // ✅
+```
+````
+
+<!-- copyable_function is still not available in MSVC -->
 
 ---
+
+# `std::function`: Problem 2
+
+https://godbolt.org/z/arhbo6x3c
+
+````md magic-move
+```cpp
+std::function<void(void)> f = [i = 0] {
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // ✅
+```
+```cpp
+std::move_only_function<void(void)> f = [i = 0] {
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // ❌
+```
+```cpp
+std::copyable_function<void(void)> f = [i = 0] {
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // ❌
+```
+```cpp
+std::copyable_function<void(void) const> f = [i = 0] {
+    std::println("i={}", i);
+};
+const auto& fref = f;
+fref(); // ✅
+```
+````
+
+---
+
+# `std::function`: Problem 3
+
+````md magic-move
+```cpp
+std::function<void(void)> f = [i = 0] noexcept { // ✅
+    std::println("i={}", i);
+};
+```
+```cpp
+std::move_only_function<void(void)> f = [i = 0] noexcept { // ❌
+    std::println("i={}", i);
+};
+```
+```cpp
+std::copyable_function<void(void)> f = [i = 0] noexcept { // ❌
+    std::println("i={}", i);
+};
+```
+```cpp
+std::copyable_function<void(void) noexcept> f = [i = 0] noexcept { // ✅
+    std::println("i={}", i);
+};
+```
+````
 
