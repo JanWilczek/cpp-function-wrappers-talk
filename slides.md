@@ -33,6 +33,37 @@ Jan Wilczek (thinkcell)
 
 ---
 
+# Motivating Example: Callbacks
+
+```cpp
+struct AppWindow {
+    AppWindow() {
+        m_button.onClick(/* code to trigger when clicked */);
+    }
+
+    Button m_button;
+};
+
+struct Button {
+    void onClick(??? handler) {
+        m_handler = std::move(handler);
+    }
+
+private:
+    void handleClick() {
+        m_handler();
+    }
+
+    ??? m_handler;
+};
+```
+
+---
+
+
+
+---
+
 # `std::function`: Problem 1
 
 https://godbolt.org/z/vKsd8cPe3
@@ -161,4 +192,40 @@ std::copyable_function<void(void) noexcept> f = [i = 0] noexcept { // ✅
 };
 ```
 ````
+
+---
+
+# References & and &&
+---
+# It does not have the target_type and target accessors (direction requested by users and implementors).
+
+---
+# Invocation has strong preconditions.
+
+---
+
+# Conversions?
+
+
+
+---
+
+# Summary
+
+<v-clicks>
+
+- function pointers and STL function wrappers are great solutions for dependency inversion and callbacks
+- use `std::move_only_function` (C++23) if your function wrapper doesn't have to be copied or the callable cannot be copied
+- use `std::function_ref` (C++26) if you don't need to store the function wrapper or the callable cannot be moved
+- use `std::copyable_function` for a copyable function wrapper
+- `std::copyable_function` = `std::move_only_function` + 
+    - copy constructor
+    - copy assignment operator
+    - callables must be copy-constructible
+- avoid `std::function`
+- never call an empty function wrapper (UB)
+
+</v-clicks>
+
+<!-- function_ref is for a callable as string_view for string. std::copyable_function = std::function v2 -->
 
