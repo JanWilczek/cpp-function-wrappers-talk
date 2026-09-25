@@ -35,28 +35,44 @@ Jan Wilczek (thinkcell)
 
 # Motivating Example: Logger
 
+````md magic-move
 ```cpp
-struct AppWindow {
-    AppWindow() {
-        m_button.onClick(/* code to trigger when clicked */);
-    }
-
-    Button m_button;
-};
-
-struct Button {
-    void onClick(??? handler) {
-        m_handler = std::move(handler);
-    }
-
-private:
-    void handleClick() {
-        m_handler();
-    }
-
-    ??? m_handler;
-};
+void doStuff() {
+    // do stuff
+}
 ```
+```cpp
+void doStuff() {
+    // do stuff
+    std::println("Stuff done.");
+}
+```
+```cpp
+using Logger = void (*)(std::string_view);
+
+void doStuff(Logger log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+doStuff([](std::string_view str) {
+    std::println("Message: {}", str);
+});
+```
+```cpp {all|8-11}
+using Logger = void (*)(std::string_view);
+
+void doStuff(Logger log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+doStuff([i = 0](std::string_view str) {
+    std::println("Message {}: {}", i, str);
+    ++i;
+});
+```
+````
 
 ---
 
