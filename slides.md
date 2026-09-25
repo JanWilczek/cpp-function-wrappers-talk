@@ -33,7 +33,7 @@ Jan Wilczek (thinkcell)
 
 ---
 
-# Motivating Example: Callbacks
+# Motivating Example: Logger
 
 ```cpp
 struct AppWindow {
@@ -207,6 +207,23 @@ std::copyable_function<void(void) noexcept> f = [i = 0] noexcept { // ✅
 # Conversions?
 
 
+---
+layout: center
+---
+
+# Will `std::function` be deprecated?
+
+---
+layout: center
+---
+
+# Probably not 🙃
+
+<v-click>
+
+## But there is a proposal for it: [P2721](https://wg21.link/P2721)
+
+</v-click>
 
 ---
 
