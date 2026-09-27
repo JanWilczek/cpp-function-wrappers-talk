@@ -17,7 +17,7 @@ export:
 class: text-center
 drawings:
   persist: false
-transition: slide-left
+transition: none
 comark: true
 lineNumbers: true
 fonts:
@@ -30,6 +30,20 @@ duration: 45min
 # C++ Function Wrappers
 
 Jan Wilczek (thinkcell)
+
+
+---
+
+# Fast & `std::function`
+
+<v-clicks>
+
+- `std::function`
+- `std::move_only_function` (C++23)
+- `std::function_ref` (C++26)
+- `std::copyable_function` (C++26)
+
+</v-clicks>
 
 ---
 
@@ -67,16 +81,61 @@ void doStuff(Logger log) {
     log("Stuff done.");
 }
 
-doStuff([i = 0](std::string_view str) {
+doStuff([i = 0](std::string_view str) mutable {
     std::println("Message {}: {}", i, str);
     ++i;
-});
+}); // ❌
 ```
 ````
 
 ---
 
+# `std::function`
 
+```cpp
+void doStuff(std::function<void(std::string_view)> log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+doStuff([i = 0](std::string_view str) mutable {
+    std::println("Message {}: {}", i, str);
+    ++i;
+});
+```
+
+---
+
+# `std::function`
+
+````md magic-move
+```cpp
+void doStuff(std::function<void(std::string_view)> log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = [i = 0](std::string_view str) mutable {
+    std::println("Message {}: {}", i, str);
+    ++i;
+};
+doStuff(logger);
+doStuff(logger);
+```
+```cpp
+void doStuff(const std::function<void(std::string_view)>& log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = [i = 0](std::string_view str) mutable {
+    std::println("Message {}: {}", i, str);
+    ++i;
+};
+doStuff(logger);
+doStuff(logger);
+```
+````
 
 ---
 
@@ -254,6 +313,17 @@ https://www.reddit.com/r/cpp_questions/s/yxX2MXa4Yy
 # "Invocation has strong preconditions"
 
 ## Why? 🤔
+
+<v-click>
+
+- Invoking an empty `std::function` is a bug
+
+</v-click>
+<v-click>
+
+- Implementations can now assert on this
+
+</v-click>
 
 <v-click>
 
