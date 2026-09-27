@@ -213,10 +213,76 @@ std::copyable_function<void(void) noexcept> f = [i = 0] noexcept { // ✅
 
 # References & and &&
 ---
+layout: center
+---
+
+# Further differences from `std::function`
+
+---
+
 # It does not have the target_type and target accessors (direction requested by users and implementors).
 
 ---
-# Invocation has strong preconditions.
+
+# "Invocation has strong preconditions"
+
+https://godbolt.org/z/8b5fMbaoe
+
+```cpp {all|1|2-3|4}
+std::function<void(void)>{}(); // std::bad_function_call
+std::move_only_function<void(void)>{}(); // UB
+std::copyable_function<void(void)>{}(); // UB
+std::function_ref<void(void)>{}(); // ❌
+```
+
+---
+
+# "Invocation has strong preconditions"
+
+## Why? 🤔
+
+<v-click>
+
+https://www.reddit.com/r/cpp_questions/s/yxX2MXa4Yy
+
+<img src="./assets/reddit1.png" class="h-100"/>
+
+</v-click>
+
+---
+
+# "Invocation has strong preconditions"
+
+## Why? 🤔
+
+<v-click>
+
+- "Don't pay for what you don't use"
+
+</v-click>
+<v-click>
+
+- Exceptionless environments
+
+</v-click>
+<v-click>
+
+- `noexcept` propagation
+```cpp
+std::throwing_move_only_function<void(void) noexcept> f;
+f(); // throws despite noexcept
+f = [] noexcept { /* ... */ };
+```
+
+</v-click>
+
+---
+layout: center
+---
+
+> I guess Java/C#/Go wasn't getting enough backend projects and Rust wasn't getting enough low level work. Gotta take the opportunity to make C++ just a little more unsafe and make sure even the most up-to-date C++ still has a mountain of gotchas baked in. Don't worry; I'm sure there will be a safety profile for that later. (Yeah right.)
+
+> The language is too big to die, but not for lack of trying. The C++ language development strategy at this is to pretty much fiddle while Rome burns basically.
 
 ---
 
