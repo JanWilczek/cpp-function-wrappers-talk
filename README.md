@@ -1,4 +1,15 @@
-# Welcome to [Slidev](https://github.com/slidevjs/slidev)!
+# C++ Function Wrappers
+
+Notes and slides for Jan Wilczek's talk on
+
+- `std::function`
+- `std::move_only_function`
+- `std::copyable_function`
+- `std::function_ref`
+
+Check out the checked-in PDF for rendered slides.
+
+## Getting Started
 
 To start the slide show:
 
@@ -9,3 +20,4 @@ To start the slide show:
 Edit the [slides.md](./slides.md) to see the changes.
 
 Learn more about Slidev at the [documentation](https://sli.dev/).
+
