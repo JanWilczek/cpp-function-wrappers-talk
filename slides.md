@@ -206,6 +206,80 @@ const auto g = f; // ✅
 
 ---
 
+#
+
+````md magic-move
+```cpp {all|7-10|1-5|12|12-13}
+namespace awe {
+struct AwesomeLogger {
+    void log(std::string_view) & { /* ... */ }
+};
+}
+
+void doStuff(const std::function<void(std::string_view)>& log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = std::make_unique<awe::AwesomeLogger>();
+doStuff(?);
+```
+```cpp {12-15}
+namespace awe {
+struct AwesomeLogger {
+    void log(std::string_view) & { /* ... */ }
+};
+}
+
+void doStuff(const std::function<void(std::string_view)>& log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
+    logger->log(str);
+};
+doStuff(logger);
+```
+```cpp {12-15|7-15}
+namespace awe {
+struct AwesomeLogger {
+    void log(std::string_view) & { /* ... */ }
+};
+}
+
+void doStuff(const std::function<void(std::string_view)>& log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
+    logger->log(str);
+};
+doStuff(logger); // ❌
+```
+```cpp {7-15}
+namespace awe {
+struct AwesomeLogger {
+    void log(std::string_view) & { /* ... */ }
+};
+}
+
+void doStuff(const std::move_only_function<void(std::string_view)>& log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
+    logger->log(str);
+};
+doStuff(logger); // ✅
+```
+````
+
+
+---
+
 # `std::function`: Problem 2
 
 https://godbolt.org/z/arhbo6x3c
