@@ -29,8 +29,26 @@ duration: 45min
 
 # C++ Function Wrappers
 
-Jan Wilczek (thinkcell)
+## Jan Wilczek (thinkcell)
 
+Berlin, Sep 28, 2026
+
+---
+
+<img src="./assets/Fast&Furious.jpeg"/>
+
+---
+
+# Fast & Furious
+
+<div class="flex items-start gap-8">
+  <div class="flex flex-col gap-6">
+    <img v-click src="./assets/DomToretto.png" class="h-30 rounded-full shadow-xl"/>
+    <img v-click src="./assets/LukeHobbs.png" class="h-30 rounded-full shadow-xl"/>
+    <img v-click src="./assets/deckard-shaw.png" class="h-30 rounded-full shadow-xl"/>
+  </div>
+  <img v-click src="./assets/JakobToretto.png" class="h-30 rounded-full shadow-xl"/>
+</div>
 
 ---
 
@@ -432,6 +450,12 @@ CountingLogger logger{[](std::string_view str) {
 doStuff(logger); // disaster 💀
 ```
 ````
+
+---
+
+# `tc::function_ref`
+
+
 
 ---
 
