@@ -185,7 +185,7 @@ doStuff(logger); // ✅
 <v-clicks>
 
 - C++11
-- passing callables without specifying their type
+- pass callables without explicit types or templates
 - functions as first-class objects
 - dependency injection (Strategy)
 - callbacks (Observer, GUI, threads, async operations)
@@ -503,11 +503,13 @@ $\iff$ `std::move_only_function` +
 
 ---
 
-# Multithreaded logger
+# Thread-safe logger
+
+https://godbolt.org/z/4YrE485sj
 
 ````md magic-move
-```cpp {all|6-9}
-void doStuff(const std::move_only_function<void(std::string_view)>& log) {
+```cpp {all|6-8}
+void doStuff(std::move_only_function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
@@ -517,67 +519,39 @@ auto logger = [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_vie
 };
 doStuff(logger);
 ```
-```cpp {6-10}
-void doStuff(const std::move_only_function<void(std::string_view)>& log) {
+```cpp {6-9|6-10}
+void doStuff(std::move_only_function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
 
-LoggerQueue queue{std::make_unique<awe::AwesomeLogger>()};
-auto logger = [&queue] (std::string_view str) {
-    queue.push(str);
-};
-doStuff(logger);
-```
-```cpp {6-10}
-void doStuff(const std::move_only_function<void(std::string_view)>& log) {
-    // do stuff
-    log("Stuff done.");
-}
-
-LoggerQueue queue{std::make_unique<awe::AwesomeLogger>()};
-auto logger = [&queue, mutex = std::mutex{}] (std::string_view str) {
+auto logger = [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) {
     std::lock_guard lock{mutex};
-    queue.push(str);
+    logger->log(str);
 };
 doStuff(logger);
 ```
 ```cpp {6-10|all}
-void doStuff(const std::move_only_function<void(std::string_view)>& log) {
+void doStuff(std::move_only_function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
 
-LoggerQueue queue{std::make_unique<awe::AwesomeLogger>()};
-auto logger = [&queue, mutex = std::mutex{}] (std::string_view str) {
+auto logger = [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) {
     std::lock_guard lock{mutex};
-    queue.push(str);
+    logger->log(str);
 };
 doStuff(logger); // ❌
 ```
-```cpp {6-10}
-void doStuff(const std::function_ref<void(std::string_view)>& log) {
-    // do stuff
-    log("Stuff done.");
-}
-
-LoggerQueue queue{std::make_unique<awe::AwesomeLogger>()};
-auto logger = [&queue, mutex = std::mutex{}] (std::string_view str) {
-    std::lock_guard lock{mutex};
-    queue.push(str);
-};
-doStuff(logger); // ✅
-```
-```cpp {6-10}
+```cpp {all}
 void doStuff(std::function_ref<void(std::string_view)> log) {
     // do stuff
     log("Stuff done.");
 }
 
-LoggerQueue queue{std::make_unique<awe::AwesomeLogger>()};
-auto logger = [&queue, mutex = std::mutex{}] (std::string_view str) {
+auto logger = [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) {
     std::lock_guard lock{mutex};
-    queue.push(str);
+    logger->log(str);
 };
 doStuff(logger); // ✅
 ```
@@ -593,6 +567,10 @@ doStuff(logger); // ✅
 
 - Non-owning callable wrapper
 - Does for functions the same job as `std::string_view` for `std::string`
+- Similar features to `std::move_only_function`
+    - const correctness
+    - `const`/`noexcept`/ref qualifiers
+    - more
 
 </v-clicks>
 
@@ -600,8 +578,10 @@ doStuff(logger); // ✅
 
 # Composite logger
 
+https://godbolt.org/z/dxav63a7K
+
 ````md magic-move
-```cpp
+```cpp {all|11-12|2-3|5-8|all}
 struct CountingLogger {
     CountingLogger(std::function<void(std::string_view)> logger)
         : m_logger(std::move(logger)) {}
@@ -619,7 +599,7 @@ private:
 ```cpp
 struct CountingLogger {
     CountingLogger(std::function_ref<void(std::string_view)> logger)
-        : m_logger(std::move(logger)) {}
+        : m_logger(logger) {}
 
     void operator()(std::string_view str) {
         ++m_i;
@@ -634,30 +614,40 @@ private:
 ```cpp
 struct CountingLogger {
     CountingLogger(std::function_ref<void(std::string_view)> logger)
-        : m_logger(std::move(logger)) {}
-//...
+        : m_logger(logger) {}
+
+    void operator()(std::string_view str) {
+        ++m_i;
+        m_logger(str);
+    }
+
 private:
     std::function_ref<void(std::string_view)> m_logger;
     int m_i;
 };
 
-CountingLogger logger{[](std::string_view str) {
-    std::println("{}", str);
+auto logger = CountingLogger{[name = "foo"](std::string_view str) {
+    std::println("[{}]: {}", name, str);
 }};
 doStuff(logger);
 ```
-```cpp {all|10-12}
+```cpp {all|11}
 struct CountingLogger {
     CountingLogger(std::function_ref<void(std::string_view)> logger)
-        : m_logger(std::move(logger)) {}
-//...
+        : m_logger(logger) {}
+
+    void operator()(std::string_view str) {
+        ++m_i;
+        m_logger(str);
+    }
+
 private:
     std::function_ref<void(std::string_view)> m_logger;
     int m_i;
 };
 
-CountingLogger logger{[](std::string_view str) {
-    std::println("{}", str);
+auto logger = CountingLogger{[name = "foo"](std::string_view str) {
+    std::println("[{}]: {}", name, str);
 }};
 doStuff(logger); // disaster 💀
 ```
