@@ -85,7 +85,7 @@ void doStuff() {
     std::println("Stuff done.");
 }
 ```
-```cpp
+```cpp {all|1|3-6|8-10|11}
 using Logger = void (*)(std::string_view);
 
 void doStuff(Logger log) {
@@ -93,11 +93,12 @@ void doStuff(Logger log) {
     log("Stuff done.");
 }
 
-doStuff([](std::string_view str) {
+auto logger = [](std::string_view str) {
     std::println("Message: {}", str);
-});
+};
+doStuff(logger);
 ```
-```cpp {all|8-11}
+```cpp {8-11|12}
 using Logger = void (*)(std::string_view);
 
 void doStuff(Logger log) {
@@ -105,10 +106,37 @@ void doStuff(Logger log) {
     log("Stuff done.");
 }
 
-doStuff([i = 0](std::string_view str) mutable {
+auto logger = [i = 0](std::string_view str) mutable {
     std::println("Message {}: {}", i, str);
     ++i;
-}); // ❌
+};
+doStuff(logger);
+```
+```cpp {12|all}
+using Logger = void (*)(std::string_view);
+
+void doStuff(Logger log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = [i = 0](std::string_view str) mutable {
+    std::println("Message {}: {}", i, str);
+    ++i;
+};
+doStuff(logger); // ❌
+```
+```cpp {all|1|10}
+void doStuff(std::function<void(std::string_view)> log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = [i = 0](std::string_view str) mutable {
+    std::println("Message {}: {}", i, str);
+    ++i;
+};
+doStuff(logger); // ✅
 ```
 ````
 
@@ -116,29 +144,17 @@ doStuff([i = 0](std::string_view str) mutable {
 
 # `std::function`
 
-```cpp
-void doStuff(std::function<void(std::string_view)> log) {
-    // do stuff
-    log("Stuff done.");
-}
-
-doStuff([i = 0](std::string_view str) mutable {
-    std::println("Message {}: {}", i, str);
-    ++i;
-});
-```
-
----
-
-# `std::function`
+<img src="./assets/DomToretto.png" class="h-30 rounded-full shadow-xl"/>
 
 <v-clicks>
 
 - passing callables without specifying their type
 - functions as first-class objects
-- dependency injection
-- callbacks (GUI, threads, async operations)
+- dependency injection (Strategy)
+- callbacks (Observer, GUI, threads, async operations)
+- deferred execution
 - algorithms
+- ABI stability
 
 </v-clicks>
 
@@ -146,7 +162,21 @@ doStuff([i = 0](std::string_view str) mutable {
 
 # `std::function`
 
+https://godbolt.org/z/nG7ME146d
+
 ````md magic-move
+```cpp
+void doStuff(std::function<void(std::string_view)> log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = [i = 0](std::string_view str) mutable {
+    std::println("Message {}: {}", i, str);
+    ++i;
+};
+doStuff(logger);
+```
 ```cpp
 void doStuff(std::function<void(std::string_view)> log) {
     // do stuff
@@ -160,8 +190,8 @@ auto logger = [i = 0](std::string_view str) mutable {
 doStuff(logger);
 doStuff(logger);
 ```
-```cpp
-void doStuff(const std::function<void(std::string_view)>& log) {
+```cpp {all|1|all}
+void doStuff(std::function<void(std::string_view)> log) {
     // do stuff
     log("Stuff done.");
 }
@@ -170,53 +200,57 @@ auto logger = [i = 0](std::string_view str) mutable {
     std::println("Message {}: {}", i, str);
     ++i;
 };
+doStuff(logger); // Message 0: Stuff done.
+doStuff(logger); // Message 0: Stuff done.
+```
+```cpp {all|1|6-9|10-11}
+void doStuff(const std::function<void(std::string_view)>& log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = std::function{[i = 0](std::string_view str) mutable {
+    std::println("Message {}: {}", i, str);
+    ++i;
+}};
 doStuff(logger);
 doStuff(logger);
+```
+```cpp {10-11|all|1,6,8}
+void doStuff(const std::function<void(std::string_view)>& log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger = std::function{[i = 0](std::string_view str) mutable {
+    std::println("Message {}: {}", i, str);
+    ++i;
+}};
+doStuff(logger); // Message 0: Stuff done.
+doStuff(logger); // Message 1: Stuff done.
 ```
 ````
 
 ---
 
-# `std::function`: Problem 1
+# `std::function`: "constness bug"
 
 https://godbolt.org/z/vKsd8cPe3
 
 ````md magic-move
-```cpp
-std::function<void(void)> f = [i = 0] {
-    std::println("i={}", i);
-};
-const auto& fref = f;
-fref(); // will this compile?
-```
-```cpp
-std::function<void(void)> f = [i = 0] {
-    std::println("i={}", i);
-};
-const auto& fref = f;
-fref(); // ✅
-```
-```cpp
-std::function<void(void)> f = [i = 0] mutable {
+```cpp {all|1-4|5-6|all}
+auto f = std::function{[i = 0] mutable {
     ++i;
     std::println("i={}", i);
-};
-const auto& fref = f;
-fref(); // will this compile?
-```
-```cpp
-std::function<void(void)> f = [i = 0] mutable {
-    ++i;
-    std::println("i={}", i);
-};
+}};
 const auto& fref = f;
 fref(); // i=1 ⚠️
 ```
 ```cpp
-std::move_only_function<void(void)> f = [i = 0] mutable {
+auto f = std::move_only_function{[i = 0] mutable {
     ++i;
     std::println("i={}", i);
-};
+}};
 const auto& fref = f;
 fref(); // ❌
 ```
@@ -230,74 +264,100 @@ fref(); // ❌
 
 # "Awesome" logger
 
+https://godbolt.org/z/xK5bK7vxo
+
 ````md magic-move
-```cpp {all|7-10|1-5|12|12-13}
+```cpp {all|7-10|1-5|12|3,7,12-13}
 namespace awe {
 struct AwesomeLogger {
     void log(std::string_view) & { /* ... */ }
 };
 }
 
-void doStuff(const std::function<void(std::string_view)>& log) {
+void doStuff(std::function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
 
 auto logger = std::make_unique<awe::AwesomeLogger>();
-doStuff(?);
+doStuff(/* ? */);
 ```
-```cpp {12-15}
+```cpp {7,12-16}
 namespace awe {
 struct AwesomeLogger {
     void log(std::string_view) & { /* ... */ }
 };
 }
 
-void doStuff(const std::function<void(std::string_view)>& log) {
+void doStuff(std::function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
 
-auto logger = [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
+auto logger = std::function{
+        [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
     logger->log(str);
-};
+}};
 doStuff(logger);
 ```
-```cpp {12-15|7-15}
+```cpp {7,12-16}
 namespace awe {
 struct AwesomeLogger {
     void log(std::string_view) & { /* ... */ }
 };
 }
 
-void doStuff(const std::function<void(std::string_view)>& log) {
+void doStuff(std::function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
 
-auto logger = [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
+auto logger = std::function{
+        [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
     logger->log(str);
-};
-doStuff(logger); // ❌
+}}; // ❌
+doStuff(logger);
 ```
-```cpp {7-15}
+```cpp {7,12-16}
 namespace awe {
 struct AwesomeLogger {
     void log(std::string_view) & { /* ... */ }
 };
 }
 
-void doStuff(const std::move_only_function<void(std::string_view)>& log) {
+void doStuff(std::move_only_function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
 
-auto logger = [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
+auto logger = std::move_only_function<void(std::string_view)>>{
+        [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
     logger->log(str);
-};
-doStuff(logger); // ✅
+}}; // ✅
+doStuff(logger);
 ```
 ````
+
+---
+
+# `std::move_only_function`
+
+<img src="./assets/LukeHobbs.png" class="h-30 rounded-full shadow-xl"/>
+
+<v-clicks>
+
+- C++23
+- non-copyable
+- allows move-only callables
+- allows copyable callables
+- const-correct
+- fixes a few more problems of `std::function`...
+
+</v-clicks>
+
+---
+
+# `tc::move_only_function`
 
 ---
 
@@ -385,8 +445,14 @@ doStuff(logger); // ✅
 
 # `std::function_ref`
 
+<img src="./assets/deckard-shaw.png" class="h-30 rounded-full shadow-xl"/>
+
+<v-clicks>
+
 - Non-owning callable wrapper
 - Does for functions the same job as `std::string_view` for `std::string`
+
+</v-clicks>
 
 ---
 
@@ -615,6 +681,20 @@ layout: center
 
 # Conversions?
 
+
+---
+
+# Summary: `std::function` problems
+
+<v-clicks>
+
+- binds non-const callables to const refs
+- disallows move-only callables
+- disallows non-movable, non-copyable callables
+- does not propagate `const`, `noexcept`, `&`, or `&&` to `operator()`
+- throws `std::bad_function_call`
+
+</v-clicks>
 
 ---
 layout: center
