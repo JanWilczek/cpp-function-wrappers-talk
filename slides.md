@@ -89,6 +89,8 @@ Berlin, Sep 28, 2026
 
 # Motivating Example: Logger
 
+https://godbolt.org/z/MGW3bv4rr
+
 ````md magic-move
 ```cpp
 void doStuff() {
@@ -164,6 +166,7 @@ doStuff(logger); // ✅
 
 <v-clicks>
 
+- C++11
 - passing callables without specifying their type
 - functions as first-class objects
 - dependency injection (Strategy)
@@ -806,7 +809,7 @@ layout: center
 
 <v-clicks>
 
-- can call a non-const callable via a const ref
+- can call a non-const callable via a const resf
 - disallows move-only callables
 - disallows non-movable, non-copyable callables
 - does not propagate `const`, `noexcept`, `&`, or `&&` to `operator()`
