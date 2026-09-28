@@ -44,7 +44,7 @@ Berlin, Sep 28, 2026
 <div class="flex items-start gap-8">
   <div class="flex flex-col gap-6">
     <img v-click src="./assets/DomToretto.png" class="h-30 rounded-full shadow-xl"/>
-    <img v-click src="./assets/LukeHobbs.png" class="h-30 rounded-full shadow-xl"/>
+    <img v-click src="./assets/LukeHobbs.png" class="h-301 rounded-full shadow-xl"/>
     <img v-click src="./assets/deckard-shaw.png" class="h-30 rounded-full shadow-xl"/>
   </div>
   <img v-click src="./assets/JakobToretto.png" class="h-30 rounded-full shadow-xl"/>
@@ -62,6 +62,10 @@ Berlin, Sep 28, 2026
 - `std::copyable_function` (C++26)
 
 </v-clicks>
+
+---
+
+# Outline
 
 ---
 
@@ -220,6 +224,8 @@ const auto g = f; // ✅
 ```
 ````
 
+[N4159](https://wg21.link/n4159)
+
 <!-- copyable_function is still not available in MSVC -->
 
 ---
@@ -299,7 +305,7 @@ doStuff(logger); // ✅
 
 # Multithreaded logger
 
-````
+````md magic-move
 ```cpp {all|6-9}
 void doStuff(const std::move_only_function<void(std::string_view)>& log) {
     // do stuff
