@@ -860,7 +860,12 @@ layout: center
     - callables must be copy-constructible
 - avoid `std::function`
 - never call an empty function wrapper (UB)
+- check out think-cell-library: [github.com/think-cell/think-cell-library](https://github.com/think-cell/think-cell-library)
 
 </v-clicks>
 
-<!-- function_ref is for a callable as string_view for string. std::copyable_function = std::function v2 -->
+<img v-click v-drag="[644,251,271,271]" src="./assets/qr_code.png"/>
+
+<!--
+function_ref is for a callable as string_view for string. std::copyable_function = std::function v2
+-->
