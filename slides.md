@@ -778,9 +778,15 @@ f = [] noexcept { /* ... */ };
 layout: center
 ---
 
-> I guess Java/C#/Go wasn't getting enough backend projects and Rust wasn't getting enough low level work. Gotta take the opportunity to make C++ just a little more unsafe and make sure even the most up-to-date C++ still has a mountain of gotchas baked in. Don't worry; I'm sure there will be a safety profile for that later. (Yeah right.)
+<blockquote>
+<p>I guess Java/C#/Go wasn't getting enough backend projects and Rust wasn't getting enough low level work. Gotta take the opportunity to make C++ just a little more unsafe and make sure even the most up-to-date C++ still has a mountain of gotchas baked in. Don't worry; I'm sure there will be a safety profile for that later. (Yeah right.)</p>
 
-> The language is too big to die, but not for lack of trying. The C++ language development strategy at this is to pretty much fiddle while Rome burns basically.
+<br>
+
+<p>The language is too big to die, but not for lack of trying.</p>
+
+<span v-mark.highlight.yellow="1">The C++ language development strategy at this is to pretty much fiddle while Rome burns basically.</span>
+</blockquote>
 
 ---
 
