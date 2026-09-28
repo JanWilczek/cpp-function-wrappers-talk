@@ -35,6 +35,24 @@ Berlin, Sep 28, 2026
 
 ---
 
+# Who am I?
+
+<v-clicks>
+
+- Jan Wilczek \[Yan Vil-check\]
+- Founder of TheWolfSound.com & online course creator
+- C++ Speaker at think-cell
+
+</v-clicks>
+
+---
+layout: image
+---
+
+<img src="./assets/tc_homepage_hero.webp" class="w-full h-full"/>
+
+---
+
 <img src="./assets/Fast&Furious.jpeg"/>
 
 ---
