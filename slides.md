@@ -713,7 +713,7 @@ void foo() {
 }
 
 auto f = std::function<void(void)>{foo};
-std::println("{}", f.target_type().name()); // std::type_info
+std::println("{}", f.target_type().name()); // prints "PFvvE"
 
 if (void (*const* ptr)() = f.target<void(*)()>()) {
     std::println("Guessed it!");
