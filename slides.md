@@ -384,12 +384,13 @@ doStuff(logger);
 
 <v-clicks>
 
-- C++23
+- C++23 ([P0288](https://wg21.link/P0288))
 - non-copyable
 - allows move-only callables
 - allows copyable callables
 - const-correct
 - fixes a few more problems of `std::function`...
+- Available in [github.com/think-cell/think-cell-library](https://github.com/think-cell/think-cell-library)
 
 </v-clicks>
 
@@ -465,10 +466,6 @@ auto f = std::move_only_function<void(void) const noexcept>{[] noexcept {
 
 ---
 
-# `tc::move_only_function`
-
----
-
 # Limitation of `std::move_only_function`
 
 ````md magic-move
@@ -499,6 +496,7 @@ $\iff$ `std::move_only_function` +
 - copy constructor
 - copy assignment operator
 - callables must be copy-constructible
+- C++26 ([P2548](https://wg21.link/p2548))
 
 </v-clicks>
 
@@ -566,12 +564,14 @@ doStuff(logger); // ✅
 
 <v-clicks>
 
+- C++26 ([P0792](https://wg21.link/P0792))
 - Non-owning callable wrapper
 - Does for functions the same job as `std::string_view` for `std::string`
 - Similar features to `std::move_only_function`
     - const correctness
     - `const`/`noexcept`/ref qualifiers
     - more
+- Available in [github.com/think-cell/think-cell-library](https://github.com/think-cell/think-cell-library)
 
 </v-clicks>
 
@@ -653,12 +653,6 @@ auto logger = CountingLogger{[name = "foo"](std::string_view str) {
 doStuff(logger); // disaster 💀
 ```
 ````
-
----
-
-# `tc::function_ref`
-
-
 
 ---
 layout: center
