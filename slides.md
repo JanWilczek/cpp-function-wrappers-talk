@@ -768,8 +768,8 @@ https://www.reddit.com/r/cpp_questions/s/yxX2MXa4Yy
 - `noexcept` propagation
 ```cpp
 std::throwing_move_only_function<void(void) noexcept> f;
-f(); // throws despite noexcept
-f = [] noexcept { /* ... */ };
+f(); // throws despite noexcept because empty
+f = [] noexcept { /* ... */ }; // assign
 ```
 
 </v-click>
@@ -790,8 +790,15 @@ layout: center
 
 ---
 
-# Conversions?
+# Conversions
 
+
+| From \ To | `function` | `move_only_function` | `copyable_function` | `function_ref` |
+|---|:---:|:---:|:---:|:---:|
+| `function` | | ✅ | ✅ | ✅ |
+| `move_only_function` | ❌ | | ❌ | ✅ |
+| `copyable_function` | ✅ | ✅ | | ✅ |
+| `function_ref` | ✅ | ✅ | ✅ | |
 
 ---
 
@@ -799,7 +806,7 @@ layout: center
 
 <v-clicks>
 
-- binds non-const callables to const refs
+- can call a non-const callable via a const ref
 - disallows move-only callables
 - disallows non-movable, non-copyable callables
 - does not propagate `const`, `noexcept`, `&`, or `&&` to `operator()`
