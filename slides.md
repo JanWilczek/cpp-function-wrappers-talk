@@ -443,9 +443,6 @@ auto f = std::move_only_function<void(void) const noexcept>{[] noexcept {
 
 ---
 
-# References & and &&
----
-
 # `tc::move_only_function`
 
 ---
@@ -659,7 +656,58 @@ layout: center
 
 ---
 
-# It does not have the target_type and target accessors (direction requested by users and implementors).
+# Ref-qualifiers
+
+https://godbolt.org/z/8KbMErccf
+
+```cpp {all|1-2|3|4|5-6}
+auto f = std::function<void(void)>{ // cannot have & or && within <>
+    [] { std::println("Hello, Ref/Ref Ref/Val!"); }};
+f();
+std::move(f)();
+std::function<void(void)>{
+    [] { std::println("Hello, Ref/Ref Ref/Val!"); }}();
+```
+
+---
+
+# Ref-qualifiers
+
+https://godbolt.org/z/8KbMErccf
+
+```cpp {1-3|5-7|9-12}
+std::move_only_function<void(void) &>{[] {
+        std::println("Hello, Ref!");
+}}(); // ❌
+
+auto f_ref = std::move_only_function<void(void) &>{
+    [] { std::println("Hello, Ref!"); }};
+f_ref();
+
+auto f_ref_ref = std::move_only_function<void(void) &&>{
+    [] { std::println("Hello, Ref Ref!"); }};
+f_ref_ref(); // ❌
+std::move(f_ref_ref)()
+```
+
+---
+
+# No `target_type()` and `target()` accessors (requested by users and implementors)
+
+https://godbolt.org/z/6rxGvfGEW
+
+```cpp {1-5|6|8-10}
+void foo() {
+    std::println("Hello, Type!");
+}
+
+auto f = std::function<void(void)>{foo};
+std::println("{}", f.target_type().name()); // std::type_info
+
+if (void (*const* ptr)() = f.target<void(*)()>()) {
+    std::println("Guessed it!");
+}
+```
 
 ---
 
