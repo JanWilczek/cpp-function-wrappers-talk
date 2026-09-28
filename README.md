@@ -7,7 +7,7 @@ Notes and slides for Jan Wilczek's talk on
 - `std::copyable_function`
 - `std::function_ref`
 
-Check out the checked-in PDF for rendered slides.
+Check out the [checked-in PDF](./cpp-function-wrappers-talk-jan-wilczek.pdf) for rendered slides.
 
 ## Getting Started
 

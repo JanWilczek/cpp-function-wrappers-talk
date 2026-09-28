@@ -25,6 +25,7 @@ fonts:
   mono: CaskaydiaCove Nerd Font
   local: CaskaydiaCove Nerd Font
 duration: 45min
+exportFilename: cpp-function-wrappers-talk-jan-wilczek
 ---
 
 # C++ Function Wrappers
