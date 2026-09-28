@@ -386,39 +386,58 @@ const auto& fref = f;
 fref(); // ✅
 ```
 ```cpp
-auto f = std::move_only_function<void(void) const>{[i = 0] {
+auto f = std::move_only_function<void(void)>{[i = 0] {
     std::println("i={}", i);
 }};
 const auto& fref = f;
 fref(); // ❌
 ```
-
+```cpp
+auto f = std::move_only_function<void(void) const>{[i = 0] {
+    std::println("i={}", i);
+}};
+const auto& fref = f;
+fref(); // ✅
+```
 ````
 
 ---
 
 # `std::function`: Problem 3
 
+https://godbolt.org/z/P5EhvsoMv
+
 ````md magic-move
 ```cpp
-std::function<void(void)> f = [i = 0] noexcept { // ✅
-    std::println("i={}", i);
-};
+std::function<void(void)> get_f();
+//...
+auto f = get_f();
+f(); // does this throw?
 ```
 ```cpp
-std::move_only_function<void(void)> f = [i = 0] noexcept { // ❌
-    std::println("i={}", i);
-};
+std::move_only_function<void(void) noexcept> get_f();
+//...
+auto f = get_f();
+f(); // if throws, program terminates
+```
+````
+
+---
+
+# `std::function`: Problem 3
+
+https://godbolt.org/z/1zx8vKK6W
+
+````md magic-move
+```cpp
+auto f = std::move_only_function<void(void) const noexcept>{[] {
+    std::println("I don't throw");
+}}; // ❌
 ```
 ```cpp
-std::copyable_function<void(void)> f = [i = 0] noexcept { // ❌
-    std::println("i={}", i);
-};
-```
-```cpp
-std::copyable_function<void(void) noexcept> f = [i = 0] noexcept { // ✅
-    std::println("i={}", i);
-};
+auto f = std::move_only_function<void(void) const noexcept>{[] noexcept {
+    std::println("I don't throw");
+}}; // ✅
 ```
 ````
 
