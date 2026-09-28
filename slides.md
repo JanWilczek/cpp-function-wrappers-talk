@@ -233,7 +233,7 @@ doStuff(logger); // Message 1: Stuff done.
 
 ---
 
-# `std::function`: "constness bug"
+# `std::function`: Problem 1 ("constness bug")
 
 https://godbolt.org/z/vKsd8cPe3
 
@@ -357,7 +357,96 @@ doStuff(logger);
 
 ---
 
+# `std::function`: Problem 2
+
+https://godbolt.org/z/WzsfjGrev
+
+````md magic-move
+```cpp
+auto f = std::function<void(void)>{[i = 0] {
+    std::println("i={}", i);
+}};
+const auto& fref = f;
+fref(); // ✅
+```
+```cpp
+auto f = std::move_only_function<void(void) const>{[i = 0] {
+    std::println("i={}", i);
+}};
+const auto& fref = f;
+fref(); // ❌
+```
+
+````
+
+---
+
+# `std::function`: Problem 3
+
+````md magic-move
+```cpp
+std::function<void(void)> f = [i = 0] noexcept { // ✅
+    std::println("i={}", i);
+};
+```
+```cpp
+std::move_only_function<void(void)> f = [i = 0] noexcept { // ❌
+    std::println("i={}", i);
+};
+```
+```cpp
+std::copyable_function<void(void)> f = [i = 0] noexcept { // ❌
+    std::println("i={}", i);
+};
+```
+```cpp
+std::copyable_function<void(void) noexcept> f = [i = 0] noexcept { // ✅
+    std::println("i={}", i);
+};
+```
+````
+
+---
+
+# References & and &&
+---
+
 # `tc::move_only_function`
+
+---
+
+# Limitation of `std::move_only_function`
+
+````md magic-move
+```cpp
+auto f = std::move_only_function<void(void) const noexcept> {[i = 0] noexcept {
+    std::println("i={}", i);
+}};
+const auto g = f; // ❌
+```
+```cpp
+auto f = std::copyable_function<void(void) const noexcept>{[i = 0] noexcept {
+    std::println("i={}", i);
+}};
+const auto g = f; // ✅
+```
+````
+
+---
+
+# `std::copyable_function`
+
+<div />
+
+$\iff$ `std::move_only_function` + 
+
+<v-clicks>
+
+- copy constructor
+- copy assignment operator
+- callables must be copy-constructible
+
+</v-clicks>
 
 ---
 
@@ -528,73 +617,6 @@ doStuff(logger); // disaster 💀
 
 
 ---
-
-# `std::function`: Problem 2
-
-https://godbolt.org/z/arhbo6x3c
-
-````md magic-move
-```cpp
-std::function<void(void)> f = [i = 0] {
-    std::println("i={}", i);
-};
-const auto& fref = f;
-fref(); // ✅
-```
-```cpp
-std::move_only_function<void(void)> f = [i = 0] {
-    std::println("i={}", i);
-};
-const auto& fref = f;
-fref(); // ❌
-```
-```cpp
-std::copyable_function<void(void)> f = [i = 0] {
-    std::println("i={}", i);
-};
-const auto& fref = f;
-fref(); // ❌
-```
-```cpp
-std::copyable_function<void(void) const> f = [i = 0] {
-    std::println("i={}", i);
-};
-const auto& fref = f;
-fref(); // ✅
-```
-````
-
----
-
-# `std::function`: Problem 3
-
-````md magic-move
-```cpp
-std::function<void(void)> f = [i = 0] noexcept { // ✅
-    std::println("i={}", i);
-};
-```
-```cpp
-std::move_only_function<void(void)> f = [i = 0] noexcept { // ❌
-    std::println("i={}", i);
-};
-```
-```cpp
-std::copyable_function<void(void)> f = [i = 0] noexcept { // ❌
-    std::println("i={}", i);
-};
-```
-```cpp
-std::copyable_function<void(void) noexcept> f = [i = 0] noexcept { // ✅
-    std::println("i={}", i);
-};
-```
-````
-
----
-
-# References & and &&
----
 layout: center
 ---
 
@@ -724,7 +746,7 @@ layout: center
 - use `std::move_only_function` (C++23) if your function wrapper doesn't have to be copied or the callable cannot be copied
 - use `std::function_ref` (C++26) if you don't need to store the function wrapper or the callable cannot be moved
 - use `std::copyable_function` for a copyable function wrapper
-- `std::copyable_function` = `std::move_only_function` + 
+- `std::copyable_function` $\iff$ `std::move_only_function` + 
     - copy constructor
     - copy assignment operator
     - callables must be copy-constructible
