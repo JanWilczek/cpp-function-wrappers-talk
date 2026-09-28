@@ -67,7 +67,23 @@ Berlin, Sep 28, 2026
 
 ---
 
-# Outline
+# Contents
+
+<v-clicks>
+
+- Need for functions as first-class objects
+    - const-correctness
+    - copyability
+    - movabilty
+    - `noexcept`
+- `std::function` & its problems
+- `std::move_only_function` (C++23) & differences w.r.t. `std::function`
+- `std::copyable_function` (C++26) & differences w.r.t. `std::move_only_function`
+- `std::function_ref` (C++26) & differences
+- Will `std::function` be deprecated?
+- Pictures of muscled men
+
+</v-clicks>
 
 ---
 
@@ -436,7 +452,7 @@ const auto g = f; // ✅
 
 # `std::copyable_function`
 
-<div />
+<img src="./assets/JakobToretto.png" class="h-30 rounded-full shadow-xl"/>
 
 $\iff$ `std::move_only_function` + 
 
