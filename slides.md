@@ -44,7 +44,7 @@ Berlin, Sep 28, 2026
 <div class="flex items-start gap-8">
   <div class="flex flex-col gap-6">
     <img v-click src="./assets/DomToretto.png" class="h-30 rounded-full shadow-xl"/>
-    <img v-click src="./assets/LukeHobbs.png" class="h-301 rounded-full shadow-xl"/>
+    <img v-click src="./assets/LukeHobbs.png" class="h-30 rounded-full shadow-xl"/>
     <img v-click src="./assets/deckard-shaw.png" class="h-30 rounded-full shadow-xl"/>
   </div>
   <img v-click src="./assets/JakobToretto.png" class="h-30 rounded-full shadow-xl"/>
@@ -62,6 +62,8 @@ Berlin, Sep 28, 2026
 - `std::copyable_function` (C++26)
 
 </v-clicks>
+
+<v-drag-arrow v-click pos="206,203,-35,-73"/>
 
 ---
 
@@ -125,6 +127,20 @@ doStuff([i = 0](std::string_view str) mutable {
     ++i;
 });
 ```
+
+---
+
+# `std::function`
+
+<v-clicks>
+
+- passing callables without specifying their type
+- functions as first-class objects
+- dependency injection
+- callbacks (GUI, threads, async operations)
+- algorithms
+
+</v-clicks>
 
 ---
 
@@ -203,24 +219,6 @@ std::move_only_function<void(void)> f = [i = 0] mutable {
 };
 const auto& fref = f;
 fref(); // ❌
-```
-```cpp
-std::move_only_function<void(void)> f = [i = 0] mutable {
-    ++i;
-    std::println("i={}", i);
-};
-const auto& fref = f;
-fref(); // ❌
-const auto g = f; // ❌
-```
-```cpp
-std::copyable_function<void(void)> f = [i = 0] mutable {
-    ++i;
-    std::println("i={}", i);
-};
-const auto& fref = f;
-fref(); // ❌
-const auto g = f; // ✅
 ```
 ````
 
@@ -656,4 +654,3 @@ layout: center
 </v-clicks>
 
 <!-- function_ref is for a callable as string_view for string. std::copyable_function = std::function v2 -->
-
