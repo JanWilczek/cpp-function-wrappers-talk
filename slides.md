@@ -507,51 +507,68 @@ $\iff$ `std::move_only_function` +
 https://godbolt.org/z/4YrE485sj
 
 ````md magic-move
-```cpp {all|6-8}
+```cpp {all|6-9}
 void doStuff(std::move_only_function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
 
-auto logger = [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) {
+auto logger = std::move_only_function<void(std::string_view)>{
+        [logger = std::make_unique<awe::AwesomeLogger>()] (std::string_view str) mutable {
     logger->log(str);
-};
+}};
 doStuff(logger);
 ```
-```cpp {6-9|6-10}
+```cpp {6-10}
 void doStuff(std::move_only_function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
 
-auto logger = [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) {
+auto logger = std::move_only_function<void(std::string_view)>{
+        [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) mutable {
     std::lock_guard lock{mutex};
     logger->log(str);
-};
+}};
 doStuff(logger);
 ```
-```cpp {6-10|all}
+```cpp {6-10}
 void doStuff(std::move_only_function<void(std::string_view)>& log) {
     // do stuff
     log("Stuff done.");
 }
 
-auto logger = [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) {
+auto logger = std::move_only_function<void(std::string_view)>{
+        [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) mutable {
     std::lock_guard lock{mutex};
     logger->log(str);
-};
+}}; // ❌
+doStuff(logger);
+```
+```cpp {6-11|1}
+void doStuff(std::move_only_function<void(std::string_view)>& log) {
+    // do stuff
+    log("Stuff done.");
+}
+
+auto logger =
+        [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) mutable {
+    std::lock_guard lock{mutex};
+    logger->log(str);
+}; // ✅
 doStuff(logger); // ❌
 ```
-```cpp {all}
+```cpp {1|all}
 void doStuff(std::function_ref<void(std::string_view)> log) {
     // do stuff
     log("Stuff done.");
 }
 
-auto logger = [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) {
+auto logger =
+        [logger = std::make_unique<awe::AwesomeLogger>(), mutex = std::mutex{}] (std::string_view str) mutable {
     std::lock_guard lock{mutex};
     logger->log(str);
-};
+}; // ✅
 doStuff(logger); // ✅
 ```
 ````
